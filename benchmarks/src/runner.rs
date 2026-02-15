@@ -4,7 +4,7 @@ use nexus_common_testing::emulator::{
     compile_guest_project, setup_guest_project, write_guest_source_code, EmulatorType,
 };
 use nexus_vm::elf::ElfFile;
-use nexus_vm::trace::{k_trace, Trace};
+use nexus_vm::trace::k_trace;
 use nexus_vm_prover::{prove, verify};
 use num_cpus;
 use postcard;
@@ -129,10 +129,8 @@ pub fn run_benchmark<T>(
 
     let mut emulation_tracker = PhasesTracker::default();
     for _ in 0..iters {
-        let iter_elf = elf.clone();
-
         let timing_state = phase_start();
-        (view, execution_trace) = k_trace(iter_elf, &[], &public_input, &private_input, K)
+        (view, execution_trace) = k_trace(elf.clone(), &[], &public_input, &private_input, K)
             .expect("error generating trace");
         let (emulation_duration, emulation_user_time, emulation_sys_time, emulation_metrics) =
             phase_end(timing_state);
@@ -166,10 +164,8 @@ pub fn run_benchmark<T>(
     // Measure verification.
     let mut verification_tracker = PhasesTracker::default();
     for _ in 0..iters {
-        let iter_proof = proof.clone();
-
         let timing_state = phase_start();
-        verify(iter_proof, &view).unwrap();
+        verify(proof.clone(), &view).unwrap();
         let (
             verification_duration,
             verification_user_time,
